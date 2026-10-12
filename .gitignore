@@ -31,8 +31,8 @@ data/
 .idea/
 .vscode/
 
-# Model artifacts
-models/
+# Model artifacts (root-level only; do not ignore app source dirs)
+/artifacts/
 *.pkl
 *.joblib
 *.onnx

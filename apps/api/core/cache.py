@@ -67,7 +67,9 @@ cache = Cache()
 
 
 def cache_key(*parts: Any) -> str:
-    digest = hashlib.sha256(json.dumps(parts, default=str, sort_keys=True).encode()).hexdigest()
+    digest = hashlib.sha256(
+        json.dumps(parts, default=str, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
     return f"aiq:{digest}"
 
 

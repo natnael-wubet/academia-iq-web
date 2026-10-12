@@ -9,6 +9,10 @@ from apps.api.models import Author, Citation, Institution, Venue, Work, WorkAuth
 
 
 def normalize_name(name: str) -> str:
+    import unicodedata
+
+    name = unicodedata.normalize("NFD", name)
+    name = "".join(c for c in name if not unicodedata.combining(c))
     name = re.sub(r"[^\w\s]", " ", name.lower())
     return re.sub(r"\s+", " ", name).strip()
 

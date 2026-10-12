@@ -16,6 +16,8 @@ COPY packages ./packages
 COPY alembic ./alembic
 COPY alembic.ini ./alembic.ini
 
+RUN chmod +x apps/api/entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn apps.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "apps/api/entrypoint.sh"]
