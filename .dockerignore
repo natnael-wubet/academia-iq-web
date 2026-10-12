@@ -1,0 +1,36 @@
+.git
+.gitignore
+.env
+.env.*
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.db
+*.sqlite3
+
+# Node build artifacts (built inside the image, not copied from the host)
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# Data / artifacts
+artifacts/
+data/
+*.parquet
+*.csv
+*.jsonl
+*.pkl
+*.joblib
+*.onnx
+
+.idea/
+.vscode/
+.DS_Store

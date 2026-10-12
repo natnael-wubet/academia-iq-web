@@ -7,7 +7,8 @@ export default function Home() {
       <header className="flex flex-col gap-4 text-center">
         <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">Academia IQ</h1>
         <p className="text-slate-300">
-          Hybrid search across OpenAlex, Semantic Scholar, Crossref, and ORCID. Zero-cost blueprint in action.
+          Hybrid search across OpenAlex, Semantic Scholar, Crossref, and ORCID. Zero-cost blueprint
+          in action.
         </p>
       </header>
       <SearchBar />
