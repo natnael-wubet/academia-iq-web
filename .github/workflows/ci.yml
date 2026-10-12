@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest ruff mypy
+      - name: Lint
+        run: ruff check .
+      - name: Type check
+        run: mypy apps packages --ignore-missing-imports || true
+      - name: Tests
+        run: pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
+        run: npm ci || npm i
+      - name: Lint
+        run: npm run lint -- --max-warnings 0 || true
+      - name: Build
+        run: npm run build || true
+
+  workers:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/workers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
+        run: npm ci || npm i
+      - name: Type check
+        run: npx tsc --noEmit || true

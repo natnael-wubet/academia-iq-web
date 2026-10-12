@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & deploy placeholder
+        run: echo "Deploy FastAPI (Docker/Cloud Run/Render) here."
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vercel deploy placeholder
+        run: echo "Connect Vercel via Git integration (free)."
+
+  workers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wrangler deploy placeholder
+        run: echo "wrangler deploy requires CLOUDFLARE_API_TOKEN (free)."
