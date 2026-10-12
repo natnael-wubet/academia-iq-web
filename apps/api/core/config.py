@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,6 +13,18 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://academia:academia@localhost:5432/academia_iq"
     redis_url: str = "redis://localhost:6379/0"
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_database_url(cls, value: str) -> str:
+        # Render/Heroku hand out "postgres://" or "postgresql://" URLs, which
+        # SQLAlchemy would route to psycopg2. We ship psycopg (v3), so force
+        # the psycopg dialect.
+        if value.startswith("postgres://"):
+            return value.replace("postgres://", "postgresql+psycopg://", 1)
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
 
     weaviate_url: str = ""
     weaviate_api_key: str = ""

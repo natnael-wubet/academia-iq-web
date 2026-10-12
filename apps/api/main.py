@@ -28,9 +28,15 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
-    # For local development; production uses Alembic migrations.
-    if settings.environment == "development":
+    # For local development only; production uses Alembic migrations.
+    # Never let an unreachable database prevent the API (health checks,
+    # OpenAPI docs) from starting.
+    if settings.environment != "development":
+        return
+    try:
         Base.metadata.create_all(bind=engine)
+    except Exception as exc:  # pragma: no cover - depends on env
+        logging.warning("Skipping create_all (database unavailable): %s", exc)
 
 
 @app.exception_handler(Exception)
