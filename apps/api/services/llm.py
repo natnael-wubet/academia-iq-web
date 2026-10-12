@@ -24,7 +24,7 @@ def _chat(messages: list[dict], temperature: float = 0.2, max_tokens: int = 512)
             "temperature": temperature,
             "max_tokens": max_tokens,
         },
-        timeout=60,
+        timeout=20,
     )
     resp.raise_for_status()
     return resp.json()["choices"][0]["message"]["content"].strip()

@@ -48,6 +48,9 @@ class Settings(BaseSettings):
 
     embedding_model: str = "all-MiniLM-L6-v2"
     embedding_dim: int = 384
+    # Loading sentence-transformers downloads a model and can take ~90s, which
+    # exceeds request/health timeouts on small hosts. Opt in explicitly.
+    use_local_embeddings: bool = False
 
     cache_ttl_seconds: int = 3600
     rate_limit_per_minute: int = 60

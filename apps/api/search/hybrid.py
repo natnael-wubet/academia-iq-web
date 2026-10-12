@@ -39,7 +39,7 @@ def hybrid_search(db: Session, req: SearchRequest, rerank: bool | None = None) -
             open_access_only=req.open_access_only,
         )
 
-    if req.mode in ("hybrid", "vector"):
+    if req.mode in ("hybrid", "vector") and settings.weaviate_url:
         query_vector = _embed_query(req.q)
         if query_vector:
             vector_hits = vector_search.search(

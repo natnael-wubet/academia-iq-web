@@ -41,6 +41,10 @@ def normalize(vec: list[float]) -> list[float]:
 def embed_texts(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
+    if not settings.use_local_embeddings:
+        # Fast, dependency-free, deterministic. Avoids a request-time model
+        # download; set USE_LOCAL_EMBEDDINGS=true to enable the real model.
+        return [_hash_embed(t) for t in texts]
     try:
         model = _get_model()
         vectors = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
