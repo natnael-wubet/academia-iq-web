@@ -6,10 +6,11 @@ import {
   getWork,
   getWorkCitations,
   getWorkReferences,
+  listWorks,
   type Page,
   type Work,
 } from "@/lib/api";
-import { authorHref, institutionHref, useQueryParam } from "@/lib/hooks";
+import { authorHref, useQueryParam } from "@/lib/hooks";
 
 export default function PaperPage() {
   const id = useQueryParam("id");
@@ -37,11 +38,7 @@ export default function PaperPage() {
   }, [id]);
 
   if (!id) {
-    return (
-      <main className="mx-auto max-w-4xl px-4 py-12">
-        <p className="text-slate-300">Open this page from a paper link, e.g. /web/paper/?id=1</p>
-      </main>
-    );
+    return <PaperList />;
   }
 
   if (loading) {
@@ -135,6 +132,51 @@ export default function PaperPage() {
         </h2>
         <WorkList works={citations?.items ?? []} empty="No citing works recorded yet." />
       </section>
+    </main>
+  );
+}
+
+function PaperList() {
+  const [page, setPage] = useState<Page<Work> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    listWorks(25)
+      .then(setPage)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <main className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-12">
+      <h1 className="text-2xl font-semibold text-slate-50">Papers</h1>
+      {loading && <p className="text-slate-400">Loading papers...</p>}
+      {error && (
+        <Placeholder title="Papers">
+          {error}. Import papers via the ingestion pipelines to populate this list.
+        </Placeholder>
+      )}
+      {page && page.items.length === 0 && (
+        <Placeholder title="No papers yet">
+          Ingest data with <code>packages.ingestion</code> to see papers here.
+        </Placeholder>
+      )}
+      {page && page.items.length > 0 && (
+        <ul className="flex flex-col gap-4">
+          {page.items.map((w) => (
+            <li key={w.id} className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
+              <a href={`/web/paper/?id=${w.id}`} className="text-slate-100 hover:text-sky-400">
+                {w.title}
+              </a>
+              <div className="mt-1 text-xs text-slate-500">
+                {w.publication_year ?? "—"} · cited by {w.cited_by_count}
+                {page.total ? ` · ${page.total} total` : ""}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }

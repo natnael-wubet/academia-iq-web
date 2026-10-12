@@ -5,6 +5,8 @@ Revises:
 Create Date: 2026-01-01
 """
 
+import logging
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
@@ -16,7 +18,15 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+    # pg_trgm powers fuzzy title search. It is only available on PostgreSQL and
+    # is best-effort: if the role cannot create extensions we still create the
+    # rest of the schema and fall back to plain ILIKE matching.
+    trgm = False
+    try:
+        op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+        trgm = True
+    except Exception as exc:
+        logging.warning("pg_trgm unavailable, skipping trigram index: %s", exc)
 
     op.create_table(
         "institutions",
@@ -84,13 +94,14 @@ def upgrade() -> None:
     op.create_index(
         "ix_works_search_vector", "works", ["search_vector"], postgresql_using="gin"
     )
-    op.create_index(
-        "ix_works_title_trgm",
-        "works",
-        ["title"],
-        postgresql_using="gin",
-        postgresql_ops={"title": "gin_trgm_ops"},
-    )
+    if trgm:
+        op.create_index(
+            "ix_works_title_trgm",
+            "works",
+            ["title"],
+            postgresql_using="gin",
+            postgresql_ops={"title": "gin_trgm_ops"},
+        )
 
     op.create_table(
         "work_authors",

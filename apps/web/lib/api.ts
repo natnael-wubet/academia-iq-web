@@ -98,6 +98,10 @@ export function searchPapers(params: {
   return get<SearchResponse>(`/search?${qs.toString()}`);
 }
 
+export function listWorks(limit = 25, offset = 0): Promise<Page<Work>> {
+  return get<Page<Work>>(`/works?limit=${limit}&offset=${offset}`);
+}
+
 export function getWork(id: number | string): Promise<Work> {
   return get<Work>(`/works/${id}`);
 }

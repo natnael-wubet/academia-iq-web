@@ -13,7 +13,7 @@ export function SiteHeader() {
           <a href="/web/paper/" className="hover:text-sky-400">
             Papers
           </a>
-          <a href="/api/v1/docs" className="hover:text-sky-400">
+          <a href="/docs" className="hover:text-sky-400">
             API
           </a>
         </nav>

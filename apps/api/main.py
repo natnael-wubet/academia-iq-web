@@ -2,7 +2,7 @@ import logging
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
@@ -30,15 +30,26 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
+    from sqlalchemy import inspect, text
+
     # For local development only; production uses Alembic migrations.
     # Never let an unreachable database prevent the API (health checks,
     # OpenAPI docs) from starting.
-    if settings.environment != "development":
-        return
+    if settings.environment == "development":
+        try:
+            Base.metadata.create_all(bind=engine)
+        except Exception as exc:  # pragma: no cover - depends on env
+            logging.warning("Skipping create_all (database unavailable): %s", exc)
+
+    # Log database connectivity up-front so misconfiguration is obvious in the
+    # Render logs instead of surfacing as a generic 500 on the first query.
     try:
-        Base.metadata.create_all(bind=engine)
-    except Exception as exc:  # pragma: no cover - depends on env
-        logging.warning("Skipping create_all (database unavailable): %s", exc)
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            tables = sorted(inspect(conn).get_table_names())
+        logging.info("Database OK (%d tables): %s", len(tables), ", ".join(tables[:12]))
+    except Exception as exc:
+        logging.error("Database not reachable or unmigrated: %s", exc)
 
 
 @app.exception_handler(Exception)
@@ -66,6 +77,12 @@ def root() -> dict:
         "api": settings.api_v1_prefix,
         "web": "/web",
     }
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon() -> Response:
+    # The browser requests the site root; the UI lives under /web.
+    return Response(status_code=204)
 
 
 # --- Static frontend -------------------------------------------------------
