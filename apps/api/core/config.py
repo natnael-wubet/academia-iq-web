@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +11,16 @@ class Settings(BaseSettings):
     environment: str = "development"
     api_v1_prefix: str = "/api/v1"
 
-    database_url: str = "postgresql+psycopg://academia:academia@localhost:5432/academia_iq"
+    database_url: str = Field(
+        default="postgresql+psycopg://academia:academia@localhost:5432/academia_iq",
+        validation_alias=AliasChoices(
+            "DATABASE_URL",
+            "DATABASE_INTERNAL_URL",
+            "DATABASE_URL_INTERNAL",
+            "POSTGRES_URL",
+            "POSTGRESQL_URL",
+        ),
+    )
     redis_url: str = "redis://localhost:6379/0"
 
     @field_validator("database_url")
