@@ -7,13 +7,16 @@ from apps.api.core.config import get_settings
 
 settings = get_settings()
 
-engine = create_engine(
-    settings.database_url,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=5,
-    future=True,
-)
+kwargs = {
+    "pool_pre_ping": True,
+    "future": True,
+}
+if settings.database_url.startswith("sqlite"):
+    kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    kwargs["pool_size"] = 5
+    kwargs["max_overflow"] = 5
+engine = create_engine(settings.database_url, **kwargs)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
